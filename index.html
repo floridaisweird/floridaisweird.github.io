@@ -2,6 +2,41 @@
 <html lang="en">
 <head>
     <style>
+         body.light-mode {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        body.dark-mode {
+            background-color: #333;
+            color: #f1f1f1;
+        }
+
+        .toggle {
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle:before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #fff;
+            top: 1px;
+            left: 1px;
+            transition: transform 0.3s;
+        }
+
+        .toggle.dark:before {
+            transform: translateX(20px);
+        }
         .title {
             font-family: sans-serif;
         }
@@ -11,8 +46,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>
+<body class="light-mode"></body>>
     <img src="monke.jpg" alt="Monkey">
     <h1 class="title"><u>hello i just shat myself no cap try ot beat that</u></h1>
+    <script>
+        function toggleMode() {
+            const body = document.querySelector('body');
+            body.classList.toggle('dark-mode');
+        }
+    </script>
+    <h1>Light/Dark Mode Toggle</h1>
+    <div class="toggle" onclick="toggleMode()"></div>
 </body>
 </html>
