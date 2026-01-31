@@ -1,45 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-</style>   <style>
-        img{
-           border-radius: 25px; 
-           margin: 5px;
-        }
-        body{
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;  
-        }
-    </style>
-<body style="background-color: rgb(125, 179, 246);">
- <meta charset="UTF-8">
- <title>W pets</title>
- <h1>Pets I know and their rating 1-100</h1>
- <img src="tater1.jpeg" width="200px" alt="">
- <img src="tater2.jpeg" width="200px" alt="">
- <img src="tater3.jpeg" width="200px" alt="">
- <img src="tater4.jpeg" width="200px" alt="">
- <img src="tater5.jpeg" width="200px" alt="">
- <img src="tater6.jpeg" width="200px" alt="">
- <img src="tater7.jpeg" width="200px" alt="">
- <div style=""><h1>Potato</h1>
- <h2>Description:</h2>
-<p>Potato is currently the only pet in my house,
-     and I love him. He is very good but also mischevious
-     and fiesty because when hes mad he can bite,
-    and we got him in January 26th, 2025.
-</p><p> Recently, as of September
-    2025, Potato has been waking up significantly later, sometimes as late
-    as 10pm, so I think he is getting old.</p>
-<h3>Friendliness: 70 (you can pick him up if Potato knows your scent)</h3>
-<h3>Feisty: 30 (He can bite if you made him scared but he is chill)</h3>
-<h3>Playfulness: 30 (He doesnt show emotion much but he runs a lot when lights are off)</h3></div>
-<h3>Cuddliness: 50 (doesnt "cuddle")</h3>
-<h3>Intelligence: 0 (doesnt know what he is doing)</h3> </body>
- <head><link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<head>
+<meta charset="UTF-8">
+<title>Estimated Genetic Height Potential</title>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #333;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        width: 360px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 22px;
+        margin-bottom: 25px;
+        color: #2575fc;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    select {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        outline: none;
+        cursor: pointer;
+    }
+
+    button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #ff512f, #dd2476);
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .result {
+        margin-top: 25px;
+        padding: 15px;
+        background: #f1f5ff;
+        border-radius: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        display: none;
+    }
+</style>
 </head>
 
+<body>
+
+<div class="card">
+    <h1>Estimated Genetic Height Potential</h1>
+
+    <div class="input-group">
+        <label for="momHeight">Mom's Height</label>
+        <select id="momHeight"></select>
+    </div>
+
+    <div class="input-group">
+        <label for="dadHeight">Dad's Height</label>
+        <select id="dadHeight"></select>
+    </div>
+
+    <button onclick="calculateHeight()">Calculate Height</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    function populateHeights(selectId) {
+        const select = document.getElementById(selectId);
+        for (let feet = 4; feet <= 7; feet++) {
+            for (let inches = 0; inches < 12; inches++) {
+                const totalInches = feet * 12 + inches;
+                const option = document.createElement("option");
+                option.value = totalInches;
+                option.textContent = `${feet}'${inches}"`;
+                select.appendChild(option);
+            }
+        }
+    }
+
+    populateHeights("momHeight");
+    populateHeights("dadHeight");
+
+    function calculateHeight() {
+        const mom = parseInt(document.getElementById("momHeight").value);
+        const dad = parseInt(document.getElementById("dadHeight").value);
+
+        const combined = mom + dad;
+        const average = combined / 2;
+        const finalHeight = average + 5;
+
+        const feet = Math.floor(finalHeight / 12);
+        const inches = Math.round(finalHeight % 12);
+
+        const result = document.getElementById("result");
+        result.style.display = "block";
+        result.textContent = `Estimated Height: ${feet}'${inches}"`;
+    }
+</script>
+
+</body>
 </html>
