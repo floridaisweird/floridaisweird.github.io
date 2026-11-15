@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Zach’s Case Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column app shell, mode switch on top, three views (Train / Cases / Plan), bottom tab bar. */
+:root {
+  --bg: #eef0f3; --surface: #ffffff; --surface-2: #f5f6f8; --line: #d9dde3; --fg: #15181d; --muted: #5d6573;
+  --accent: #2456d8; --accent-ink: #ffffff; --accent-soft: #e3eafc;
+  --good: #1f8a4c; --good-soft: #dff3e6; --warn: #b26a00; --warn-soft: #fbefd9; --bad: #c42b3a; --bad-soft: #fbe3e5;
+  --gray-sticker: #a6acb6; --sticker-line: #1d2026; --cube-body: #1d2026;
+  --sU: #f6d20e; --sF: #1aa35a; --sR: #ff8a1f; --sB: #2563eb; --sL: #d7263d; --sD: #fbfbfb;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 12px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1216; --surface: #181c22; --surface-2: #1f242c; --line: #2c333d; --fg: #e8ebf0; --muted: #9aa3b2;
+  --accent: #7ea2ff; --accent-ink: #0d1530; --accent-soft: #1d2747;
+  --good: #4fcf86; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #33270f; --bad: #ff7a86; --bad-soft: #3a1a1e;
+  --gray-sticker: #4a515c; --sticker-line: #0b0d10; --cube-body: #0b0d10; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1216; --surface: #181c22; --surface-2: #1f242c; --line: #2c333d; --fg: #e8ebf0; --muted: #9aa3b2;
+  --accent: #7ea2ff; --accent-ink: #0d1530; --accent-soft: #1d2747;
+  --good: #4fcf86; --good-soft: #15301f; --warn: #f0b04a; --warn-soft: #33270f; --bad: #ff7a86; --bad-soft: #3a1a1e;
+  --gray-sticker: #4a515c; --sticker-line: #0b0d10; --cube-body: #0b0d10; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; -webkit-tap-highlight-color: transparent; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.shell { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 96px; }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; margin-right: auto; }
+.brand svg { width: 22px; height: 22px; }
+.seg { display: inline-flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-family: var(--f-display); cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); display: flex; justify-content: center; gap: 4px; padding: 6px max(16px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+nav.tabs button { flex: 1; max-width: 200px; border: 0; background: transparent; padding: 8px 6px; border-radius: 10px; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; }
+nav.tabs button svg { width: 22px; height: 22px; }
+nav.tabs button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); }
+h2 { font-family: var(--f-display); font-size: 18px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h3 { font-family: var(--f-display); font-size: 15px; margin: 0; }
+.label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.muted { color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 7px 12px; border-radius: 9px; cursor: pointer; font-weight: 500; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.small { padding: 4px 9px; font-size: 13px; }
+.btn.danger { color: var(--bad); }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.alg { font-family: var(--f-mono); font-size: 13px; overflow-wrap: anywhere; }
+.pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
+.st-new { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.st-learning { background: var(--warn-soft); color: var(--warn); }
+.st-practicing { background: var(--accent-soft); color: var(--accent); }
+.st-known { background: var(--good-soft); color: var(--good); }
+.num { font-variant-numeric: tabular-nums; }
+[hidden] { display: none !important; }
+
+/* Train */
+.train { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 820px) { .train { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+.scramble { font-family: var(--f-mono); font-size: clamp(17px, 4.6vw, 22px); line-height: 1.5; word-spacing: 0.15em; font-weight: 500; overflow-wrap: anywhere; }
+.timerpad { user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer; text-align: center; padding: 26px 12px 20px; border-radius: var(--r); border: 1px solid var(--line); background: var(--surface); }
+.timerpad .time { font-family: var(--f-display); font-weight: 700; font-size: clamp(56px, 17vw, 96px); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.timerpad.holding .time { color: var(--bad); }
+.timerpad.ready .time { color: var(--good); }
+.timerpad.running { background: var(--surface-2); }
+.timerpad .hint { margin-top: 8px; color: var(--muted); font-size: 13px; }
+.caseinfo { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.caseinfo svg.dia { width: 92px; height: 92px; flex: none; }
+.caseinfo > div { min-width: 0; }
+.veil { display: flex; align-items: center; justify-content: center; height: 92px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 13px; text-align: center; padding: 8px; }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; font-weight: 500; }
+.switch input { appearance: none; width: 38px; height: 22px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; margin: 0; transition: background .15s; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); transition: transform .15s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(16px); }
+.net { width: 100%; max-width: 330px; display: block; margin: 0 auto; }
+.result { display: grid; gap: 10px; }
+.statgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--surface-2); border-radius: 9px; padding: 8px; }
+.stat b { display: block; font-family: var(--f-display); font-size: 18px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 11px; color: var(--muted); }
+.banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--accent-soft); color: var(--fg); border-radius: var(--r); padding: 10px 14px; }
+.banner .t { font-family: var(--f-display); font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
+.history { display: flex; flex-wrap: wrap; gap: 6px; }
+.history span { font-variant-numeric: tabular-nums; font-size: 13px; background: var(--surface-2); padding: 2px 7px; border-radius: 6px; }
+.history span.f { color: var(--bad); text-decoration: line-through; }
+
+/* Cases */
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+@media (max-width: 420px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.case { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--r); padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; text-align: left; }
+.case.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.case:not(.on) svg.dia { opacity: .55; }
+.case svg.dia { width: 100%; max-width: 120px; aspect-ratio: 1; margin: 0 auto; display: block; }
+.case .nm { font-family: var(--f-display); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; gap: 6px; align-items: baseline; }
+.case .alg { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.case .meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.case .check { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.case.on .check { background: var(--accent); border-color: var(--accent); }
+.case.on .check::after { content: ""; width: 9px; height: 5px; border-left: 2px solid var(--accent-ink); border-bottom: 2px solid var(--accent-ink); transform: rotate(-45deg) translate(1px, -1px); }
+.case .edit { border: 1px solid var(--line); background: var(--surface-2); border-radius: 7px; padding: 2px 8px; font-size: 12px; cursor: pointer; }
+.groupttl { font-family: var(--f-display); font-weight: 600; margin: 8px 0 -2px; color: var(--muted); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Plan */
+.bars { display: grid; gap: 10px; }
+.bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; display: flex; border: 1px solid var(--line); }
+.bar i { display: block; height: 100%; }
+.bar .k { background: var(--good); } .bar .p { background: var(--accent); } .bar .l { background: var(--warn); }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: 0; }
+.blocks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .blocks { grid-template-columns: 1fr; } }
+.block { border: 1px solid var(--line); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-2); }
+.block .mins { font-family: var(--f-display); font-weight: 700; font-size: 22px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font-size: 13px; background: var(--surface); cursor: pointer; }
+.chip small { color: var(--muted); font-variant-numeric: tabular-nums; }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+textarea, input[type="text"] { width: 100%; font-family: var(--f-mono); font-size: 14px; background: var(--surface-2); color: var(--fg); border: 1px solid var(--line); border-radius: 9px; padding: 9px; }
+
+/* Sheet */
+.sheet-bg { position: fixed; inset: 0; background: rgba(8, 10, 14, .45); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+@media (min-width: 640px) { .sheet-bg { align-items: center; } }
+.sheet { background: var(--surface); width: 100%; max-width: 560px; max-height: 92vh; overflow: auto; border-radius: 16px 16px 0 0; padding: 18px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 640px) { .sheet { border-radius: 16px; } }
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; z-index: 30; font-weight: 500; font-size: 14px; max-width: calc(100% - 32px); }
+.note { font-size: 13px; padding: 8px 10px; border-radius: 8px; }
+.note.ok { background: var(--good-soft); color: var(--good); } .note.err { background: var(--bad-soft); color: var(--bad); }
+svg .sU { fill: var(--sU); } svg .sF { fill: var(--sF); } svg .sR { fill: var(--sR); } svg .sB { fill: var(--sB); } svg .sL { fill: var(--sL); } svg .sD { fill: var(--sD); } svg .sX { fill: var(--gray-sticker); }
+svg .body { fill: var(--cube-body); } svg .edge { stroke: var(--cube-body); stroke-width: .06; }
+svg .arw { stroke: #15181d; stroke-width: .12; stroke-linecap: round; fill: none; } svg .arwh { fill: #15181d; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="6" height="6" rx="1.2" fill="var(--sU)"/><rect x="9" y="2" width="6" height="6" rx="1.2" fill="var(--sU)"/><rect x="16" y="2" width="6" height="6" rx="1.2" fill="var(--gray-sticker)"/><rect x="2" y="9" width="6" height="6" rx="1.2" fill="var(--gray-sticker)"/><rect x="9" y="9" width="6" height="6" rx="1.2" fill="var(--sU)"/><rect x="16" y="9" width="6" height="6" rx="1.2" fill="var(--sU)"/><rect x="2" y="16" width="6" height="6" rx="1.2" fill="var(--sU)"/><rect x="9" y="16" width="6" height="6" rx="1.2" fill="var(--gray-sticker)"/><rect x="16" y="16" width="6" height="6" rx="1.2" fill="var(--sU)"/></svg>Zach’s Case Trainer</div>
+    <div class="seg" role="group" aria-label="Algorithm set" id="modeSeg">
+      <button data-mode="pll">PLL</button><button data-mode="oll">OLL</button><button data-mode="f2l">F2L</button>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+<nav class="tabs" id="tabs">
+  <button data-tab="train"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Train</button>
+  <button data-tab="cases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Cases</button>
+  <button data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>Plan</button>
+</nav>
+<div id="sheet"></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* Cube simulator core: facelet model built from 3D sticker coordinates. */
+const Cube = (() => {
+  const FACES = 'URFDLB';
+  // face -> (row,col) -> [pos, normal]
+  function faceSticker(f, r, c) {
+    const a = -1 + c, b = 1 - r;
+    switch (f) {
+      case 'U': return [[-1 + c, 1, -1 + r], [0, 1, 0]];
+      case 'D': return [[-1 + c, -1, 1 - r], [0, -1, 0]];
+      case 'F': return [[a, b, 1], [0, 0, 1]];
+      case 'B': return [[1 - c, b, -1], [0, 0, -1]];
+      case 'R': return [[1, b, 1 - c], [1, 0, 0]];
+      case 'L': return [[-1, b, -1 + c], [-1, 0, 0]];
+    }
+  }
+  const ST = [];
+  for (const f of FACES) for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+    const [p, n] = faceSticker(f, r, c); ST.push({ f, r, c, p, n });
+  }
+  const key = (p, n) => p.join(',') + '|' + n.join(',');
+  const IDX = new Map(ST.map((s, i) => [key(s.p, s.n), i]));
+  const idx = (f, r, c) => FACES.indexOf(f) * 9 + r * 3 + c;
+
+  // rotate vector clockwise (seen from +axis) by one quarter
+  function rotCW(v, ax) {
+    const [x, y, z] = v;
+    if (ax === 'x') return [x, z, -y];
+    if (ax === 'y') return [-z, y, x];
+    return [y, -x, z];
+  }
+  function rotCCW(v, ax) { return rotCW(rotCW(rotCW(v, ax), ax), ax); }
+  // move defs: [axis, sign(+1 cw about +axis), layer predicate on coord]
+  const AX = { x: 0, y: 1, z: 2 };
+  const DEF = {
+    U: ['y', 1, v => v === 1], D: ['y', -1, v => v === -1], R: ['x', 1, v => v === 1], L: ['x', -1, v => v === -1],
+    F: ['z', 1, v => v === 1], B: ['z', -1, v => v === -1],
+    u: ['y', 1, v => v >= 0], d: ['y', -1, v => v <= 0], r: ['x', 1, v => v >= 0], l: ['x', -1, v => v <= 0],
+    f: ['z', 1, v => v >= 0], b: ['z', -1, v => v <= 0],
+    M: ['x', -1, v => v === 0], E: ['y', -1, v => v === 0], S: ['z', 1, v => v === 0],
+    x: ['x', 1, () => true], y: ['y', 1, () => true], z: ['z', 1, () => true],
+  };
+  const PERM = {};
+  for (const m in DEF) {
+    const [ax, sg, pred] = DEF[m];
+    const perm = new Array(54); // perm[i] = destination of sticker i
+    ST.forEach((s, i) => {
+      if (!pred(s.p[AX[ax]])) { perm[i] = i; return; }
+      const fn = sg > 0 ? rotCW : rotCCW;
+      perm[i] = IDX.get(key(fn(s.p, ax), fn(s.n, ax)));
+    });
+    PERM[m] = perm;
+  }
+  function solved() { const a = []; for (const f of FACES) for (let i = 0; i < 9; i++) a.push(f); return a; }
+  function applyMove(st, m, times) {
+    const p = PERM[m];
+    for (let t = 0; t < times; t++) { const n = new Array(54); for (let i = 0; i < 54; i++) n[p[i]] = st[i]; st = n; }
+    return st;
+  }
+  // parse: returns [{m, n}] n in 1..3 (quarter turns cw)
+  function parse(alg) {
+    const out = [];
+    const s = alg.replace(/[()\[\]]/g, ' ').replace(/’/g, "'");
+    const re = /([URFDLBurfdlbMESxyz])(w?)(\d*)('?)/g;
+    let mm;
+    const cleaned = s.replace(/\s+/g, ' ').trim();
+    // validate tokens
+    for (const tok of cleaned.split(' ')) { if (tok && !/^([URFDLBurfdlbMESxyz])w?\d*'?$/.test(tok)) throw new Error('Unknown move "' + tok + '"'); }
+    while ((mm = re.exec(cleaned))) {
+      let m = mm[1]; if (mm[2]) m = m.toLowerCase();
+      let n = mm[3] ? parseInt(mm[3], 10) : 1; if (mm[4]) n = -n;
+      n = ((n % 4) + 4) % 4; if (n) out.push({ m, n });
+    }
+    return out;
+  }
+  function apply(st, alg) {
+    const mv = typeof alg === 'string' ? parse(alg) : alg;
+    for (const { m, n } of mv) st = applyMove(st, m, n);
+    return st;
+  }
+  const fmt = mv => mv.map(({ m, n }) => m + (n === 2 ? '2' : n === 3 ? "'" : '')).join(' ');
+  const invert = mv => mv.slice().reverse().map(({ m, n }) => ({ m, n: (4 - n) % 4 }));
+  const invertStr = a => fmt(invert(parse(a)));
+
+  // center-relative: recolor each sticker by which face's center has that color, so whole-cube rotation is normalized
+  const ROTS = (() => { // 24 rotation sequences
+    const seqs = []; const seen = new Set();
+    const pre = ['', 'x', 'x2', "x'", 'z', "z'"];
+    for (const a of pre) for (const b of ['', 'y', 'y2', "y'"]) {
+      const s = (a + ' ' + b).trim(); const k = apply(solved(), s).join('');
+      if (!seen.has(k)) { seen.add(k); seqs.push(s); }
+    }
+    return seqs;
+  })();
+  function reorient(st) { // rotate whole cube so centers are home (U on U, F on F)
+    for (const r of ROTS) { const t = apply(st, r); if (t[4] === 'U' && t[22] === 'F') return t; }
+    throw new Error('reorient failed');
+  }
+  function canon(st) { // recolor relative to centers (no rotation needed)
+    const map = {}; for (let f = 0; f < 6; f++) map[st[f * 9 + 4]] = FACES[f];
+    return st.map(c => map[c]);
+  }
+
+  // pieces
+  const PIECES = []; // {stickers:[idx], home:'UFR' ...}
+  (() => {
+    const byPos = new Map();
+    ST.forEach((s, i) => { const k = s.p.join(','); if (!byPos.has(k)) byPos.set(k, []); byPos.get(k).push(i); });
+    for (const [k, arr] of byPos) if (arr.length > 1) PIECES.push({ pos: k.split(',').map(Number), stickers: arr, name: arr.map(i => ST[i].f).sort((a, b) => FACES.indexOf(a) - FACES.indexOf(b)).join('') });
+  })();
+  const pieceAt = name => PIECES.find(p => p.name === name);
+  // locate a piece (by home colors) in state st (canonical colors)
+  function locate(st, name) {
+    const set = name.split('').sort().join('');
+    for (const p of PIECES) {
+      const cols = p.stickers.map(i => st[i]);
+      if (cols.slice().sort().join('') === set) {
+        // orientation: index of U/D color sticker or for edges compare
+        return { at: p.name, stickers: p.stickers, cols };
+      }
+    }
+  }
+  const pieceSolved = (st, p) => p.stickers.every(i => st[i] === ST[i].f);
+  const UL = PIECES.filter(p => p.pos[1] === 1);
+  const isU = p => p.pos[1] === 1;
+  // regions
+  const CROSS = ['DF', 'DR', 'DB', 'DL'].map(n => PIECES.find(p => p.name === n.split('').sort((a, b) => FACES.indexOf(a) - FACES.indexOf(b)).join('')));
+  const pn = s => s.split('').sort((a, b) => FACES.indexOf(a) - FACES.indexOf(b)).join('');
+  const SLOTS = { FR: [pn('DFR'), pn('FR')], FL: [pn('DFL'), pn('FL')], BR: [pn('DBR'), pn('BR')], BL: [pn('DBL'), pn('BL')] };
+  const slotSolved = (st, s) => SLOTS[s].every(n => pieceSolved(st, pieceAt(n)));
+  const crossSolved = st => CROSS.every(p => pieceSolved(st, p));
+  const f2lSolved = st => PIECES.filter(p => !isU(p)).every(p => pieceSolved(st, p)) && [1, 2, 3, 5].every(f => st[f * 9 + 4] === FACES[f]);
+  const allSolved = st => st.every((c, i) => c === ST[i].f);
+  const ollSolved = st => f2lSolved(st) && [0, 1, 2, 3, 4, 5, 6, 7, 8].every(i => st[i] === 'U');
+  const after = (st, a) => canon(apply(st, a));
+  const AUF = ['', 'U', 'U2', "U'"];
+
+  // simplify a face-turn-only sequence (merge same face, allow passing opposite face)
+  const OPP = { U: 'D', D: 'U', R: 'L', L: 'R', F: 'B', B: 'F' };
+  function simplify(mv) {
+    const out = [];
+    for (const x of mv) {
+      let merged = false;
+      for (let j = out.length - 1; j >= 0 && j >= out.length - 2; j--) {
+        if (out[j].m === x.m) {
+          // ensure anything between is opposite face
+          if (j === out.length - 2 && out[j + 1].m !== OPP[x.m]) break;
+          const n = (out[j].n + x.n) % 4;
+          if (n) out[j] = { m: x.m, n }; else out.splice(j, 1);
+          merged = true; break;
+        }
+        if (out[j].m !== OPP[x.m]) break;
+      }
+      if (!merged) out.push({ ...x });
+    }
+    // repeat until stable
+    return out.length < mv.length ? simplify(out) : out;
+  }
+  // convert any sequence (wide, slice, rotations) to outer face turns in a fixed frame
+  const DECOMP = { r: [['L', 1], ['x', 1]], l: [['R', 1], ['x', 3]], u: [['D', 1], ['y', 1]], d: [['U', 1], ['y', 3]], f: [['B', 1], ['z', 1]], b: [['F', 1], ['z', 3]],
+    M: [['R', 1], ['L', 3], ['x', 3]], E: [['U', 1], ['D', 3], ['y', 3]], S: [['F', 3], ['B', 1], ['z', 1]] };
+  function toFaceTurns(alg) {
+    const mv = typeof alg === 'string' ? parse(alg) : alg;
+    let frame = solved(); const out = [];
+    const phys = L => frame[FACES.indexOf(L) * 9 + 4];
+    for (const { m, n } of mv) for (let t = 0; t < n; t++) {
+      const parts = DECOMP[m] || [[m, 1]];
+      for (const [pm, pc] of parts) {
+        if ('xyz'.includes(pm)) frame = applyMove(frame, pm, pc);
+        else out.push({ m: phys(pm), n: pc });
+      }
+    }
+    return simplify(out);
+  }
+  return { FACES, ST, idx, solved, parse, apply, fmt, invert, invertStr, reorient, canon, PIECES, pieceAt, locate, pieceSolved, SLOTS, slotSolved, crossSolved, f2lSolved, allSolved, ollSolved, after, AUF, simplify, toFaceTurns, isU, pn };
+})();
+// export = Cube;
+
+/* Algorithm library. Cases are defined by their main algorithm; the simulator derives each case's picture from it. */
+const ALGS = (() => {
+  const OLL_GROUPS = {
+    OCLL: [21, 22, 23, 24, 25, 26, 27], T: [33, 45], P: [31, 32, 43, 44], W: [36, 38], L: [47, 48, 49, 50, 53, 54],
+    C: [34, 46], Line: [51, 52, 55, 56], Dot: [1, 2, 3, 4, 17, 18, 19, 20], Square: [5, 6], 'Small lightning': [7, 8, 11, 12],
+    'Big lightning': [39, 40], Fish: [9, 10, 35, 37], Knight: [13, 14, 15, 16], Awkward: [29, 30, 41, 42], 'Edges only': [28, 57],
+  };
+  const OLL_ALGS = {
+    1: "R U2 R2 F R F' U2 R' F R F'", 2: "F R U R' U' F' f R U R' U' f'", 3: "f R U R' U' f' U' F R U R' U' F'",
+    4: "f R U R' U' f' U F R U R' U' F'", 5: "r' U2 R U R' U r", 6: "r U2 R' U' R U' r'", 7: "r U R' U R U2 r'",
+    8: "l' U' L U' L' U2 l", 9: "R U R' U' R' F R2 U R' U' F'", 10: "R U R' U R' F R F' R U2 R'",
+    11: "r U R' U R' F R F' R U2 r'", 12: "M' R' U' R U' R' U2 R U' R r'", 13: "F U R U' R2 F' R U R U' R'",
+    14: "R' F R U R' F' R F U' F'", 15: "r' U' r R' U' R U r' U r", 16: "r U r' R U R' U' r U' r'",
+    17: "R U R' U R' F R F' U2 R' F R F'", 18: "r U R' U R U2 r2 U' R U' R' U2 r", 19: "M U R U R' U' M' R' F R F'",
+    20: "r U R' U' M2 U R U' R' U' M'", 21: "R U2 R' U' R U R' U' R U' R'", 22: "R U2 R2 U' R2 U' R2 U2 R",
+    23: "R2 D' R U2 R' D R U2 R", 24: "r U R' U' r' F R F'", 25: "F' r U R' U' r' F R", 26: "R U2 R' U' R U' R'",
+    27: "R U R' U R U2 R'", 28: "r U R' U' r' R U R U' R'", 29: "R U R' U' R U' R' F' U' F R U R'",
+    30: "F R' F R2 U' R' U' R U R' F2", 31: "R' U' F U R U' R' F' R", 32: "L U F' U' L' U L F L'",
+    33: "R U R' U' R' F R F'", 34: "R U R2 U' R' F R U R U' F'", 35: "R U2 R2 F R F' R U2 R'",
+    36: "L' U' L U' L' U L U L F' L' F", 37: "F R' F' R U R U' R'", 38: "R U R' U R U' R' U' R' F R F'",
+    39: "L F' L' U' L U F U' L'", 40: "R' F R U R' U' F' U R", 41: "R U R' U R U2 R' F R U R' U' F'",
+    42: "R' U' R U' R' U2 R F R U R' U' F'", 43: "F' U' L' U L F", 44: "F U R U' R' F'", 45: "F R U R' U' F'",
+    46: "R' U' R' F R F' U R", 47: "R' U' R' F R F' R' F R F' U R", 48: "F R U R' U' R U R' U' F'",
+    49: "r U' r2 U r2 U r2 U' r", 50: "r' U r2 U' r2 U' r2 U r'", 51: "F U R U' R' U R U' R' F'",
+    52: "R U R' U R U' B U' B' R'", 53: "l' U2 L U L' U' L U L' U l", 54: "r U2 R' U' R U R' U' R U' r'",
+    55: "R' F R U R U' R2 F' R2 U' R' U R U R'", 56: "r' U' r U' R' U R U' R' U R r' U r", 57: "R U R' U' M' U R U' r'",
+  };
+  const OCLL_NAMES = { 21: 'H', 22: 'Pi', 23: 'Headlights', 24: 'Chameleon', 25: 'Bowtie', 26: 'Antisune', 27: 'Sune' };
+  const OLL = [];
+  for (const [g, ids] of Object.entries(OLL_GROUPS)) for (const n of ids)
+    OLL.push({ id: 'oll' + n, num: n, name: 'OLL ' + n + (OCLL_NAMES[n] ? ' · ' + OCLL_NAMES[n] : ''), group: g, alg: OLL_ALGS[n] });
+  OLL.sort((a, b) => a.num - b.num);
+
+  const PLL = [
+    ['H', 'Edges only', 'M2 U M2 U2 M2 U M2'],
+    ['Ua', 'Edges only', "M2 U M U2 M' U M2"],
+    ['Ub', 'Edges only', "M2 U' M U2 M' U' M2"],
+    ['Z', 'Edges only', "M2 U M2 U M' U2 M2 U2 M' U2"],
+    ['Aa', 'Corners only', "x R' U R' D2 R U' R' D2 R2 x'"],
+    ['Ab', 'Corners only', "x R2 D2 R U R' D2 R U' R x'"],
+    ['E', 'Corners only', "x' R U' R' D R U R' D' R U R' D R U' R' D' x"],
+    ['T', 'Adjacent swap', "R U R' U' R' F R2 U' R' U' R U R' F'"],
+    ['F', 'Adjacent swap', "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R"],
+    ['Ja', 'Adjacent swap', "x R2 F R F' R U2 r' U r U2 x'"],
+    ['Jb', 'Adjacent swap', "R U R' F' R U R' U' R' F R2 U' R' U'"],
+    ['Ra', 'Adjacent swap', "R U' R' U' R U R D R' U' R D' R' U2 R' U'"],
+    ['Rb', 'Adjacent swap', "R2 F R U R U' R' F' R U2 R' U2 R U"],
+    ['Y', 'Diagonal swap', "F R U' R' U' R U R' F' R U R' U' R' F R F'"],
+    ['V', 'Diagonal swap', "R' U R' U' y R' F' R2 U' R' U R' F R F"],
+    ['Na', 'Diagonal swap', "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'"],
+    ['Nb', 'Diagonal swap', "R' U R U' R' F' U' F R U R' F R' F' R U' R"],
+    ['Ga', 'G perms', "R2 U R' U R' U' R U' R2 U' D R' U R D'"],
+    ['Gb', 'G perms', "R' U' R U D' R2 U R' U R U' R U' R2 D"],
+    ['Gc', 'G perms', "R2 U' R U' R U R' U R2 U D' R U' R' D"],
+    ['Gd', 'G perms', "R U R' U' D R2 U' R U' R' U R' U R2 D'"],
+  ].map(([n, g, a]) => ({ id: 'pll' + n, name: n + ' perm', short: n, group: g, alg: a }));
+
+  // Advanced F2L. slot = slot being solved, free = slots that may be left unsolved (empty slot tricks).
+  const F2L = [
+    // Both pieces stuck in the slot
+    ['f1', 'Corner solved, edge flipped', 'Stuck in slot', 'FR', [], "R2 U2 F R2 F' U2 R' U R'"],
+    ['f2', 'Corner white right, edge solved', 'Stuck in slot', 'FR', [], "R U' R' U R U2 R' U R U' R'"],
+    ['f3', 'Corner white front, edge solved', 'Stuck in slot', 'FR', [], "R U' R' U' R U R' U2 R U' R'"],
+    ['f4', 'Corner white right, edge flipped', 'Stuck in slot', 'FR', [], "R U R' U' R U' R' U2 F' U' F"],
+    ['f5', 'Corner white front, edge flipped', 'Stuck in slot', 'FR', [], "F' U' F U F' U F U2 R U R'"],
+    // Corner in slot, edge in top layer
+    ['f6', 'Corner solved, edge front', 'Corner in slot', 'FR', [], "U R U' R' U' F' U F"],
+    ['f7', 'Corner solved, edge right', 'Corner in slot', 'FR', [], "U' F' U F U R U' R'"],
+    ['f8', 'Corner white right, edge right', 'Corner in slot', 'FR', [], "R U R' U' R U R'"],
+    ['f9', 'Corner white front, edge front', 'Corner in slot', 'FR', [], "F' U' F U F' U' F"],
+    ['f10', 'Corner white front, edge right', 'Corner in slot', 'FR', [], "R U' R' U R U' R'"],
+    ['f11', 'Corner white right, edge front', 'Corner in slot', 'FR', [], "F' U F U' F' U F"],
+    // Edge in slot, corner in top layer
+    ['f12', 'White up, edge solved', 'Edge in slot', 'FR', [], "U R U' R' U R U' R' U R U' R'"],
+    ['f13', 'White up, edge flipped', 'Edge in slot', 'FR', [], "R U' R' F' U2 F"],
+    ['f14', 'White front, edge solved', 'Edge in slot', 'FR', [], "R U R' U' R U' R' U R U' R'"],
+    ['f15', 'White right, edge solved', 'Edge in slot', 'FR', [], "F' U' F U F' U F U' F' U F"],
+    ['f16', 'White front, edge flipped', 'Edge in slot', 'FR', [], "R U R' U' F' U F"],
+    ['f17', 'White right, edge flipped', 'Edge in slot', 'FR', [], "F' U' F U R U' R'"],
+    // Pieces stuck in another slot (that slot's own pair is not solved yet)
+    ['f18', 'Pair stuck in back slot', 'Wrong slot', 'FR', ['BR'], "R' U' R F' U2 F"],
+    ['f19', 'Corner stuck in back slot', 'Wrong slot', 'FR', ['BR'], "R' U R U2 R U' R'"],
+    ['f20', 'Edge stuck in back slot', 'Wrong slot', 'FR', ['BR'], "R U2 R2 U' R2 U R'"],
+    ['f21', 'Pair stuck in left slot', 'Wrong slot', 'FR', ['FL'], "L' U2 L F' U F"],
+    ['f22', 'Corner stuck in left slot', 'Wrong slot', 'FR', ['FL'], "L' U L R U' R'"],
+    ['f23', 'Edge stuck in left slot', 'Wrong slot', 'FR', ['FL'], "L F2 L' F2"],
+    // Using an empty slot
+    ['f24', 'Empty back slot: white right, edge left', 'Empty slot', 'FR', ['BR'], "R' U R2 U R'"],
+    ['f25', 'Empty back slot: split pair', 'Empty slot', 'FR', ['BR'], "R' U' R2 U' R'"],
+    ['f26', 'Empty back slot: white right, edge front', 'Empty slot', 'FR', ['BR'], "R' U2 R2 U R'"],
+    ['f27', 'Edge in left slot, corner in back', 'Wrong slot', 'FR', ['FL'], "L' U L R U R'"],
+    // Back slots without rotating
+    ['f29', 'Back right: easy insert', 'Back slots', 'BR', [], "R' U' R"],
+    ['f30', 'Back right: easy insert (B)', 'Back slots', 'BR', [], "B U B'"],
+    ['f31', 'Back right: split pair', 'Back slots', 'BR', [], "U R' U R U' R' U' R"],
+    ['f32', 'Back right: white up', 'Back slots', 'BR', [], "R' U2 R U R' U' R"],
+    ['f33', 'Back left: easy insert', 'Back slots', 'BL', [], "L U L'"],
+    ['f34', 'Back left: easy insert (B)', 'Back slots', 'BL', [], "B' U' B"],
+    ['f35', 'Back left: split pair', 'Back slots', 'BL', [], "U' L U' L' U L U L'"],
+    ['f36', 'Back left: white up', 'Back slots', 'BL', [], "L U2 L' U' L U L'"],
+  ].map(([id, name, group, slot, free, alg]) => ({ id, name, group, slot, free, alg }));
+  return { OLL, PLL, F2L };
+})();
+// export = ALGS;
+
+/* Scrambles and case checks built on the simulator. */
+const Engine = ((C, A) => {
+  const S = C.solved();
+  const rnd = n => Math.floor(Math.random() * n);
+  const pick = a => a[rnd(a.length)];
+  const auf = () => pick(C.AUF);
+  const inv = a => C.invertStr(a);
+  const after = (st, a) => C.canon(C.apply(st, a));
+  const home = seq => C.canon(C.reorient(C.apply(S, seq)));
+  const REQ = c => ['FR', 'FL', 'BR', 'BL'].filter(s => s !== c.slot && !c.free.includes(s));
+  const EXTRACT = { BR: ["R' U R", "R' U' R", "R' U2 R"], FL: ["L' U L", "L' U' L", "L' U2 L"], BL: ["L U L'", "L U' L'", "L U2 L'"], FR: ["R U R'", "R U' R'", "R U2 R'"] };
+
+  // case state as the solver holds it before running the main alg
+  function caseState(mode, c) {
+    if (mode === 'f2l') return C.canon(C.apply(S, c.free.map(s => EXTRACT[s][0]).join(' ') + ' ' + inv(c.alg)));
+    return C.canon(C.apply(S, inv(c.alg)));
+  }
+  // does alg solve this state's case (allowing an AUF before and after)?
+  function solves(mode, c, st, alg) {
+    for (const a of C.AUF) {
+      let t;
+      try { t = after(st, a + ' ' + alg); } catch (e) { return false; }
+      if (mode === 'oll' && C.ollSolved(t)) return true;
+      if (mode === 'pll' && C.AUF.some(b => C.allSolved(after(t, b)))) return true;
+      if (mode === 'f2l' && C.crossSolved(t) && C.slotSolved(t, c.slot) && REQ(c).every(s => C.slotSolved(t, s))) return true;
+    }
+    return false;
+  }
+  function isCase(mode, c, st) {
+    if (mode === 'f2l') { if (C.slotSolved(st, c.slot) || !C.crossSolved(st) || !REQ(c).every(s => C.slotSolved(st, s))) return false; }
+    else if (!C.f2lSolved(st)) return false;
+    if (mode === 'pll' && !C.ollSolved(st)) return false;
+    return solves(mode, c, st, c.alg);
+  }
+  // two-look last layer solver using the library (OLL then PLL), returns move string
+  function twoLook(st) {
+    let o = null;
+    if (C.ollSolved(st)) o = { s: '', t: st };
+    else outer: for (const a of C.AUF) for (const c of A.OLL) {
+      const t = after(st, a + ' ' + c.alg);
+      if (C.ollSolved(t)) { o = { s: a + ' ' + c.alg, t }; break outer; }
+    }
+    if (!o) return null;
+    for (const b of C.AUF) for (const p of [{ alg: '' }].concat(A.PLL)) {
+      const t = after(o.t, b + ' ' + p.alg);
+      for (const k of C.AUF) if (C.allSolved(after(t, k))) return (o.s + ' ' + b + ' ' + p.alg + ' ' + k).replace(/\s+/g, ' ').trim();
+    }
+    return null;
+  }
+  function scramble(mode, c) {
+    let best = null;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      let seq;
+      if (mode === 'f2l') {
+        const ll = inv(pick(A.OLL).alg) + ' ' + auf() + ' ' + inv(pick(A.PLL).alg) + ' ' + auf();
+        seq = ll + ' ' + c.free.map(s => pick(EXTRACT[s])).join(' ') + ' ' + auf() + ' ' + inv(c.alg) + ' ' + auf();
+      } else {
+        const core = (mode === 'oll' ? inv(pick(A.PLL).alg) + ' ' + auf() + ' ' : auf() + ' ') + inv(c.alg) + ' ' + auf();
+        // hide the case alg: random LL state R, then reach the target from R with different algs
+        const R = inv(pick(Math.random() < 0.5 ? A.OLL : A.PLL).alg) + ' ' + auf();
+        const Y = home(inv(R) + ' ' + core);
+        const sol = twoLook(Y);
+        seq = sol === null ? core : R + ' ' + inv(sol);
+      }
+      const mv = C.toFaceTurns(seq);
+      const st = C.canon(C.apply(S, mv));
+      if (isCase(mode, c, st) && (!best || mv.length < best.moves)) best = { text: C.fmt(mv), moves: mv.length, state: st, verified: true };
+    }
+    if (best) return best;
+    const mv = C.toFaceTurns(auf() + ' ' + inv(c.alg));
+    const st = C.canon(C.apply(S, mv));
+    return { text: C.fmt(mv), moves: mv.length, state: st, verified: isCase(mode, c, st) };
+  }
+  return { caseState, solves, isCase, twoLook, scramble, EXTRACT };
+});
+// export = Engine;
+
+/* ---------- App ---------- */
+(() => {
+const C = Cube, A = ALGS, E = Engine(C, A);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtT = t => t == null ? '–' : (t < 60 ? t.toFixed(2) : Math.floor(t / 60) + ':' + (t % 60).toFixed(2).padStart(5, '0'));
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+
+const F2L_GROUPS = ['Stuck in slot', 'Corner in slot', 'Edge in slot', 'Wrong slot', 'Empty slot', 'Back slots'];
+A.F2L.sort((a, b) => F2L_GROUPS.indexOf(a.group) - F2L_GROUPS.indexOf(b.group));
+const MODES = {
+  pll: { label: 'PLL', list: A.PLL, target: 2.5, groups: ['Edges only', 'Corners only', 'Adjacent swap', 'Diagonal swap', 'G perms'] },
+  oll: { label: 'OLL', list: A.OLL, target: 2.0, groups: ['OCLL', 'T', 'P', 'W', 'L', 'C', 'Line', 'Dot', 'Square', 'Small lightning', 'Big lightning', 'Fish', 'Knight', 'Awkward', 'Edges only'] },
+  f2l: { label: 'F2L', list: A.F2L, target: 2.0, groups: F2L_GROUPS },
+};
+const BY = {}; for (const m in MODES) for (const c of MODES[m].list) { c.mode = m; BY[c.id] = c; }
+const ORDER = {
+  pll: ['T', 'Y', 'Ua', 'Ub', 'H', 'Z', 'Aa', 'Ab', 'Ja', 'Jb', 'F', 'Ra', 'Rb', 'V', 'E', 'Na', 'Nb', 'Ga', 'Gb', 'Gc', 'Gd'].map(s => 'pll' + s),
+  oll: [21, 22, 23, 24, 25, 26, 27, 33, 45, 31, 32, 43, 44, 36, 38, 47, 48, 49, 50, 53, 54, 34, 46, 51, 52, 55, 56, 5, 6, 7, 8, 11, 12, 39, 40, 9, 10, 35, 37, 13, 14, 15, 16, 29, 30, 41, 42, 28, 57, 1, 2, 3, 4, 17, 18, 19, 20].map(n => 'oll' + n),
+  f2l: A.F2L.map(c => c.id),
+};
+const STATUS = { new: 'Not started', learning: 'Learning', practicing: 'Practicing', known: 'Known' };
+
+/* ---------- storage ---------- */
+const KEY = 'caseDrill.v1';
+function defaults() {
+  return { mode: 'pll', tab: 'train', recall: true, showNet: false,
+    sel: { pll: ORDER.pll.slice(0, 10), oll: MODES.oll.list.filter(c => c.group === 'OCLL').map(c => c.id), f2l: A.F2L.filter(c => c.group === 'Stuck in slot').map(c => c.id) },
+    cases: {}, session: null, filter: {} };
+}
+let DB;
+try { DB = Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || 'null') || {}); } catch (e) { DB = defaults(); }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) { } }
+const cs = id => DB.cases[id] || (DB.cases[id] = { st: 'new', times: [] });
+const algOf = c => (DB.cases[c.id] && DB.cases[c.id].alg) || c.alg;
+
+/* ---------- stats ---------- */
+function stats(id) {
+  const t = cs(id).times, ok = t.filter(x => !x.f);
+  const last12 = ok.slice(-12).map(x => x.t);
+  const rec = t.filter(x => x.r).slice(-12);
+  return { n: t.length, best: ok.length ? Math.min(...ok.map(x => x.t)) : null, avg: mean(last12), fails: t.filter(x => x.f).length,
+    recentFails: t.slice(-8).filter(x => x.f).length, recallAvg: rec.length === 12 && !rec.some(x => x.f) ? mean(rec.map(x => x.t)) : null, recallN: rec.length };
+}
+function weight(c) {
+  const s = stats(c.id), tgt = MODES[c.mode].target, st = cs(c.id).st;
+  let w = 1;
+  if (s.n < 5) w += 1.5;
+  if (s.avg) w += Math.min(4, Math.max(0, s.avg / tgt - 1) * 2);
+  w += s.recentFails * 1.5;
+  if (st === 'learning') w += 1;
+  if (st === 'known') w *= 0.6;
+  return w;
+}
+
+/* ---------- diagrams ---------- */
+const CLS = { U: 'sU', F: 'sF', R: 'sR', B: 'sB', L: 'sL', D: 'sD' };
+const ST = C.ST;
+const cache = {};
+function llSVG(c) {
+  const st = E.caseState(c.mode, c);
+  const isPLL = c.mode === 'pll';
+  let s = `<svg class="dia" viewBox="-2.2 -2.2 4.4 4.4" role="img" aria-label="${esc(c.name)}"><rect x="-1.56" y="-1.56" width="3.12" height="3.12" rx=".22" class="body"/>`;
+  ST.forEach((t, i) => {
+    if (t.p[1] !== 1) return;
+    const col = isPLL ? CLS[st[i]] : (st[i] === 'U' ? 'sU' : 'sX');
+    const [x, , z] = t.p, n = t.n;
+    let r;
+    if (n[1] === 1) r = [x - .45, z - .45, .9, .9];
+    else if (n[2] === 1) r = [x - .44, 1.66, .88, .4];
+    else if (n[2] === -1) r = [x - .44, -2.06, .88, .4];
+    else if (n[0] === 1) r = [1.66, z - .44, .4, .88];
+    else r = [-2.06, z - .44, .4, .88];
+    s += `<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" rx=".1" class="${col}"/>`;
+  });
+  if (isPLL) s += pllArrows(c, st);
+  return s + '</svg>';
+}
+function pllArrows(c, st) {
+  const ft = C.toFaceTurns(c.alg);
+  let k = C.AUF.find(a => C.allSolved(C.canon(C.apply(C.apply(st, ft), a)))) || '';
+  const ids = C.apply(ST.map((_, i) => i), C.fmt(ft) + ' ' + k);
+  const seen = new Set(); let out = '';
+  for (let j = 0; j < 9; j++) {
+    if (j === 4) continue;
+    const from = ids[j]; if (from === j || from >= 9) continue;
+    const a = ST[from].p, b = ST[j].p; const key = [from, j].sort().join('-');
+    const dbl = ids[from] === j;
+    if (dbl && seen.has(key)) continue; seen.add(key);
+    const dx = b[0] - a[0], dz = b[2] - a[2], L = Math.hypot(dx, dz), sh = .26;
+    const x1 = a[0] + dx / L * sh, y1 = a[2] + dz / L * sh, x2 = b[0] - dx / L * sh, y2 = b[2] - dz / L * sh;
+    out += `<line x1="${x1.toFixed(3)}" y1="${y1.toFixed(3)}" x2="${x2.toFixed(3)}" y2="${y2.toFixed(3)}" class="arw" marker-end="url(#ah)"${dbl ? ' marker-start="url(#ah)"' : ''}/>`;
+  }
+  return out;
+}
+function f2lSVG(c) {
+  const st = E.caseState('f2l', c);
+  const view = c.slot === 'BR' ? 'y' : c.slot === 'BL' ? 'y2' : '';
+  const v = view ? C.apply(st, view) : st;
+  const target = C.SLOTS[c.slot].map(n => n.split('').sort().join(''));
+  const freeP = c.free.flatMap(s => C.SLOTS[s]).map(n => n.split('').sort().join(''));
+  const pieceOf = new Map(); C.PIECES.forEach(p => p.stickers.forEach(i => pieceOf.set(i, p)));
+  const P = (x, y, z) => [((x - z) * .866).toFixed(3), (-y + (x + z) * .5).toFixed(3)];
+  let s = `<svg class="dia" viewBox="-2.75 -3.12 5.5 6.24" role="img" aria-label="${esc(c.name)}">`;
+  // cube body
+  const face = (n, t1, t2) => { const ctr = n.map(q => q * 1.5); const pts = [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(([a, b]) => P(...ctr.map((q, i) => q + a * 1.52 * t1[i] + b * 1.52 * t2[i]))); return `<polygon points="${pts.map(p => p.join(',')).join(' ')}" class="body"/>`; };
+  s += face([0, 1, 0], [1, 0, 0], [0, 0, 1]) + face([0, 0, 1], [1, 0, 0], [0, 1, 0]) + face([1, 0, 0], [0, 0, 1], [0, 1, 0]);
+  ST.forEach((t, i) => {
+    const n = t.n; let t1, t2;
+    if (n[1] === 1) { t1 = [1, 0, 0]; t2 = [0, 0, 1]; } else if (n[2] === 1) { t1 = [1, 0, 0]; t2 = [0, 1, 0]; } else if (n[0] === 1) { t1 = [0, 0, 1]; t2 = [0, 1, 0]; } else return;
+    const p = pieceOf.get(i); let col = CLS[v[i]];
+    if (p) {
+      const set = p.stickers.map(q => v[q]).sort().join('');
+      if (!target.includes(set) && (set.includes('U') || freeP.includes(set))) col = 'sX';
+    }
+    const ctr = t.p.map((q, k) => q + n[k] * .5);
+    const pts = [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(([a, b]) => P(...ctr.map((q, k) => q + a * .43 * t1[k] + b * .43 * t2[k])));
+    s += `<polygon points="${pts.map(p => p.join(',')).join(' ')}" class="${col}" stroke-linejoin="round"/>`;
+  });
+  return s + '</svg>';
+}
+const diagram = c => cache[c.id] || (cache[c.id] = c.mode === 'f2l' ? f2lSVG(c) : llSVG(c));
+function netSVG(st) {
+  const off = { U: [3, 0], L: [0, 3], F: [3, 3], R: [6, 3], B: [9, 3], D: [3, 6] };
+  let s = `<svg class="net" viewBox="-.1 -.1 12.2 9.2" role="img" aria-label="Scrambled cube net">`;
+  ST.forEach((t, i) => { const [ox, oy] = off[t.f]; s += `<rect x="${ox + t.c + .05}" y="${oy + t.r + .05}" width=".9" height=".9" rx=".12" class="${CLS[st[i]]} edge"/>`; });
+  return s + '</svg>';
+}
+
+/* ---------- trainer state ---------- */
+let cur = null, last = null, sessionTimes = [];
+let timer = { state: 'idle', start: 0, hold: null, raf: 0 };
+let forceCase = null;
+function activeSession() {
+  const s = DB.session;
+  if (!s) return null;
+  if (Date.now() > s.end) { DB.session = null; save(); toast(`${BLOCKS[s.block].title} block finished.`); return null; }
+  return s.mode === DB.mode ? s : null;
+}
+function poolIds() {
+  const m = DB.mode, list = MODES[m].list, s = activeSession();
+  if (s) {
+    if (s.block === 'review') return list.filter(c => cs(c.id).st === 'known').map(c => c.id);
+    if (s.block === 'learn') return list.filter(c => ['learning', 'practicing'].includes(cs(c.id).st)).map(c => c.id);
+  }
+  return DB.sel[m].filter(id => BY[id]);
+}
+function nextCase() {
+  const ids = poolIds();
+  if (forceCase && BY[forceCase] && BY[forceCase].mode === DB.mode) { const id = forceCase; forceCase = null; return BY[id]; }
+  if (!ids.length) return null;
+  let cand = ids.map(id => BY[id]);
+  if (cand.length > 1 && cur) cand = cand.filter(c => c.id !== cur.c.id);
+  const ws = cand.map(weight), tot = ws.reduce((a, b) => a + b, 0);
+  let r = Math.random() * tot;
+  for (let i = 0; i < cand.length; i++) { r -= ws[i]; if (r <= 0) return cand[i]; }
+  return cand[cand.length - 1];
+}
+function newScramble() {
+  const c = nextCase();
+  cur = c ? { c, scr: E.scramble(c.mode, c), mode: c.mode } : null;
+}
+
+/* ---------- rendering ---------- */
+function render() {
+  document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === DB.mode));
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tab === DB.tab));
+  const v = $('#view');
+  if (DB.tab === 'train') v.innerHTML = trainHTML();
+  else if (DB.tab === 'cases') v.innerHTML = casesHTML();
+  else v.innerHTML = planHTML();
+}
+function pill(st) { return `<span class="pill st-${st}">${STATUS[st]}</span>`; }
+
+function trainHTML() {
+  const m = DB.mode, s = activeSession();
+  if (!cur || cur.mode !== m) newScramble();
+  const ids = poolIds();
+  let h = '';
+  if (s) h += `<div class="banner"><b>${BLOCKS[s.block].title}</b><span class="muted">${BLOCKS[s.block].sub}</span><span class="t" id="sesLeft">${fmtLeft(s.end - Date.now())}</span><button class="btn small" data-act="endSession">End block</button></div>`;
+  h += '<div class="train"><div class="stack">';
+  if (!cur) {
+    h += `<div class="card stack"><h2>No cases to drill</h2><p class="muted" style="margin:0">${s ? 'This block has no cases yet. ' + (s.block === 'review' ? 'Cases move to Known once you hit the target time in recall mode.' : 'Mark some cases as Learning on the Plan tab.') : 'Pick some cases on the Cases tab first.'}</p><div class="row"><button class="btn primary" data-act="tab" data-v="${s ? 'plan' : 'cases'}">${s ? 'Open plan' : 'Choose cases'}</button></div></div>`;
+    return h + '</div></div>';
+  }
+  const c = cur.c, recall = DB.recall;
+  h += `<div class="card stack">
+    <div class="row" style="justify-content:space-between"><span class="label">Scramble · ${cur.scr.moves} moves${cur.scr.verified ? ' · checked' : ''}</span>
+    <label class="switch"><input type="checkbox" id="recallSw" data-act="recall" ${recall ? 'checked' : ''}>Recall mode</label></div>
+    <div class="scramble" id="scrText">${esc(cur.scr.text)}</div>
+    <div class="row"><button class="btn small" data-act="skip">New scramble</button><button class="btn small" data-act="toggleNet" aria-pressed="${DB.showNet}">${DB.showNet ? 'Hide' : 'Show'} cube net</button><span class="muted" style="font-size:13px">Yellow top, green front.</span></div>
+    ${DB.showNet ? `<div>${netSVG(cur.scr.state)}</div>` : ''}
+    ${recall ? `<div class="veil">Case hidden in recall mode. It shows after you stop the timer.</div>` :
+      `<div class="caseinfo">${diagram(c)}<div><h3>${esc(c.name)}</h3><div class="muted" style="font-size:13px">${esc(c.group)}</div><div class="alg">${esc(algOf(c))}</div></div></div>`}
+  </div>
+  <div class="timerpad" id="pad" role="button" tabindex="0" aria-label="Timer"><div class="time" id="time">${(timer.state === 'done' || timer.state === 'stopped') && last ? fmtT(last.t) : '0.00'}</div><div class="hint">Hold space or press and hold here. Release to start, press to stop.</div></div>
+  </div><div class="stack">`;
+  h += resultHTML();
+  const sesOk = sessionTimes.filter(x => !x.f).map(x => x.t);
+  h += `<div class="card stack"><div class="row" style="justify-content:space-between"><h3>This session</h3><span class="muted" style="font-size:13px">${ids.length} case${ids.length === 1 ? '' : 's'} in rotation</span></div>
+    <div class="statgrid"><div class="stat"><b>${sessionTimes.length}</b><span>Solves</span></div><div class="stat"><b>${fmtT(mean(sesOk))}</b><span>Mean</span></div><div class="stat"><b>${fmtT(sesOk.length ? Math.min(...sesOk) : null)}</b><span>Best</span></div><div class="stat"><b>${sessionTimes.filter(x => x.f).length}</b><span>Needed help</span></div></div>
+    <div class="history">${sessionTimes.slice(-24).reverse().map(x => `<span class="${x.f ? 'f' : ''}" title="${esc(BY[x.id].name)}">${fmtT(x.t)}</span>`).join('') || '<span class="muted" style="background:none;padding:0">Times show here.</span>'}</div></div>`;
+  h += slowHTML();
+  return h + '</div></div>';
+}
+function resultHTML() {
+  if (!last) return `<div class="card stack"><h3>How it works</h3><ol class="steps muted" style="font-size:14px"><li>Apply the scramble with yellow on top and green in front.</li><li>Hold, release, solve the case, then stop the timer.</li><li>Check the case and recall the alg. Tap “Needed help” if you had to look.</li></ol></div>`;
+  const c = BY[last.id], s = stats(c.id), st = cs(c.id).st, tgt = MODES[c.mode].target;
+  const showAlg = last.reveal || !last.recall;
+  return `<div class="card result">
+    <div class="row" style="justify-content:space-between"><span class="label">Last solve</span>${pill(st)}</div>
+    <div class="caseinfo">${diagram(c)}<div><h3>${esc(c.name)}</h3><div class="muted" style="font-size:13px">${esc(c.group)} · <span class="num">${fmtT(last.t)}</span>${last.f ? ' · needed help' : ''}</div>
+    ${showAlg ? `<div class="alg">${esc(algOf(c))}</div>` : `<button class="btn small" data-act="reveal" style="margin-top:6px">Show alg</button>`}</div></div>
+    <div class="statgrid"><div class="stat"><b>${s.n}</b><span>Attempts</span></div><div class="stat"><b>${fmtT(s.avg)}</b><span>Avg of 12</span></div><div class="stat"><b>${fmtT(s.best)}</b><span>Best</span></div><div class="stat"><b>${s.recallN}/12</b><span>Recall tries</span></div></div>
+    <div class="muted" style="font-size:13px">Known target: ${tgt}s average over 12 recall tries${s.recallAvg != null ? ` · now ${fmtT(s.recallAvg)}` : ''}.</div>
+    <div class="row"><button class="btn small" data-act="fail" aria-pressed="${!!last.f}">Needed help</button><button class="btn small danger" data-act="delLast">Delete time</button><button class="btn small" data-act="edit" data-id="${c.id}">Edit case</button></div>
+  </div>`;
+}
+function slowHTML() {
+  const list = poolIds().map(id => ({ c: BY[id], s: stats(id) })).filter(x => x.s.n).sort((a, b) => weight(b.c) - weight(a.c)).slice(0, 6);
+  if (!list.length) return '';
+  return `<div class="card stack"><h3>Coming up more often</h3><div class="chips">${list.map(x => `<button class="chip" data-act="edit" data-id="${x.c.id}">${esc(x.c.short || x.c.name.replace('OLL ', ''))}<small>${fmtT(x.s.avg)}${x.s.recentFails ? ' · ' + x.s.recentFails + ' help' : ''}</small></button>`).join('')}</div></div>`;
+}
+
+function casesHTML() {
+  const m = DB.mode, M = MODES[m], sel = new Set(DB.sel[m]);
+  let h = `<div class="stack"><div class="card stack"><div class="row" style="justify-content:space-between"><h2>${M.label} cases</h2><span class="muted num">${sel.size} of ${M.list.length} selected</span></div>
+  <p class="muted" style="margin:0;font-size:14px">Tap a case to add it to or remove it from the drill. Use Edit to change its algorithm or status.</p>
+  <div class="filters"><button class="btn small" data-act="selAll">All</button><button class="btn small" data-act="selNone">None</button>
+  ${M.groups.map(g => { const ids = M.list.filter(c => c.group === g).map(c => c.id); const on = ids.every(i => sel.has(i)); return `<button class="btn small" data-act="selGroup" data-v="${esc(g)}" aria-pressed="${on}">${esc(g)}</button>`; }).join('')}
+  ${m === 'f2l' ? `<button class="btn small" data-act="selSlot" data-v="FR">Front right</button><button class="btn small" data-act="selSlot" data-v="back">Back slots</button>` : ''}</div>
+  <div class="filters"><span class="label" style="align-self:center">By status</span>${['learning', 'practicing', 'known', 'new'].map(s => `<button class="btn small" data-act="selStatus" data-v="${s}">${STATUS[s]}</button>`).join('')}</div></div>`;
+  for (const g of M.groups) {
+    const cs_ = M.list.filter(c => c.group === g); if (!cs_.length) continue;
+    h += `<div class="groupttl">${esc(g)}</div><div class="grid">`;
+    for (const c of cs_) {
+      const st = cs(c.id).st, s = stats(c.id);
+      h += `<div class="case ${sel.has(c.id) ? 'on' : ''}" data-act="toggle" data-id="${c.id}" role="checkbox" aria-checked="${sel.has(c.id)}" tabindex="0"><span class="check"></span>${diagram(c)}
+        <div class="nm"><span>${esc(c.short ? c.name : c.name.replace(/^OLL /, 'OLL '))}</span></div>
+        <div class="alg">${esc(algOf(c))}</div>
+        <div class="meta">${pill(st)}<span class="muted num" style="font-size:12px">${s.n ? fmtT(s.avg) : ''}</span><button class="edit" data-act="edit" data-id="${c.id}">Edit</button></div></div>`;
+    }
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+
+/* ---------- plan ---------- */
+const BLOCKS = {
+  review: { title: 'Review', mins: 5, sub: 'Known cases, recall mode' },
+  learn: { title: 'Learn', mins: 10, sub: 'Learning and Practicing cases, alg shown' },
+  mixed: { title: 'Mixed recall', mins: 5, sub: 'Everything you selected, recall mode' },
+};
+const PACE = { pll: '2–3 new cases a week, most common first', oll: '3 new cases a week. Start once PLL is done', f2l: '1–2 groups a week. 20 slow tries per case, then go for speed' };
+function weekStart() { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); }
+function counts(m) { const r = { new: 0, learning: 0, practicing: 0, known: 0 }; MODES[m].list.forEach(c => r[cs(c.id).st]++); return r; }
+function upNext(m) {
+  const fresh = ORDER[m].filter(id => cs(id).st === 'new');
+  if (m === 'f2l') { if (!fresh.length) return []; const g = BY[fresh[0]].group; return fresh.filter(id => BY[id].group === g); }
+  return fresh.slice(0, 3);
+}
+function fmtLeft(ms) { ms = Math.max(0, ms); const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function planHTML() {
+  const m = DB.mode, M = MODES[m], s = activeSession();
+  let h = '<div class="stack"><div class="card stack"><h2>Progress</h2><div class="bars">';
+  for (const k of ['pll', 'oll', 'f2l']) {
+    const n = counts(k), tot = MODES[k].list.length, pc = x => (x / tot * 100).toFixed(1) + '%';
+    h += `<div><div class="row" style="justify-content:space-between"><b style="font-family:var(--f-display)">${MODES[k].label}</b><span class="muted num" style="font-size:13px">${n.known} known · ${n.practicing} practicing · ${n.learning} learning · ${tot} total</span></div>
+      <div class="bar" role="img" aria-label="${MODES[k].label}: ${n.known} of ${tot} known"><i class="k" style="width:${pc(n.known)}"></i><i class="p" style="width:${pc(n.practicing)}"></i><i class="l" style="width:${pc(n.learning)}"></i></div></div>`;
+  }
+  h += `</div><div class="legend"><span><i style="background:var(--good)"></i>Known</span><span><i style="background:var(--accent)"></i>Practicing</span><span><i style="background:var(--warn)"></i>Learning</span></div></div>`;
+
+  // today
+  const known = M.list.filter(c => cs(c.id).st === 'known'), learning = M.list.filter(c => ['learning', 'practicing'].includes(cs(c.id).st));
+  const review = known.slice().sort((a, b) => weight(b) - weight(a)).slice(0, 6);
+  h += `<div class="card stack"><div class="row" style="justify-content:space-between"><h2>Today · ${M.label}</h2><span class="muted" style="font-size:13px">20 minutes</span></div><div class="blocks">`;
+  for (const [k, b] of Object.entries(BLOCKS)) {
+    const n = k === 'review' ? known.length : k === 'learn' ? learning.length : DB.sel[m].length;
+    const on = s && s.block === k;
+    h += `<div class="block"><span class="label">${k === 'review' ? 'First' : k === 'learn' ? 'Then' : 'Finish'}</span><span class="mins">${b.mins} min</span><b>${b.title}</b><span class="muted" style="font-size:13px">${b.sub} · ${n} case${n === 1 ? '' : 's'}</span>
+      ${on ? `<button class="btn small" data-act="endSession">End · ${fmtLeft(s.end - Date.now())} left</button>` : `<button class="btn small primary" data-act="startBlock" data-v="${k}" ${n ? '' : 'disabled'}>Start</button>`}</div>`;
+  }
+  h += `</div><div><span class="label">Today's cases</span><div class="chips" style="margin-top:6px">${learning.concat(review).map(c => `<button class="chip" data-act="edit" data-id="${c.id}">${esc(c.short || c.name.replace('OLL ', ''))} ${pill(cs(c.id).st)}<small>${fmtT(stats(c.id).avg)}</small></button>`).join('') || '<span class="muted" style="font-size:14px">Nothing yet. Start the cases under “Up next”.</span>'}</div></div></div>`;
+
+  // up next
+  const nx = upNext(m), ws = weekStart();
+  const thisWeek = M.list.filter(c => (cs(c.id).started || 0) >= ws);
+  const pllDone = counts('pll').known === 21;
+  h += `<div class="card stack"><h2>Up next</h2><p class="muted" style="margin:0;font-size:14px">${PACE[m]}. This week you started <b class="num">${m === 'f2l' ? new Set(thisWeek.map(c => c.group)).size + ' group' + (new Set(thisWeek.map(c => c.group)).size === 1 ? '' : 's') : thisWeek.length + ' case' + (thisWeek.length === 1 ? '' : 's')}</b>.</p>
+  ${m === 'oll' && !pllDone ? `<div class="note err" style="background:var(--warn-soft);color:var(--warn)">The plan starts OLL after all 21 PLLs are Known (${counts('pll').known} of 21 so far). You can still start early.</div>` : ''}
+  ${nx.length ? `<div class="chips">${nx.map(id => `<button class="chip" data-act="edit" data-id="${id}">${esc(BY[id].short || BY[id].name.replace('OLL ', ''))}${m === 'f2l' ? '' : ''}</button>`).join('')}</div>
+  <div class="row"><button class="btn primary" data-act="learnNext">Start learning ${m === 'f2l' ? 'the ' + esc(BY[nx[0]].group) + ' group' : 'these ' + nx.length}</button></div>` : '<p style="margin:0">Every case in this set is started.</p>'}
+  <details><summary class="muted" style="cursor:pointer;font-size:14px">Full order</summary><div class="chips" style="margin-top:8px">${ORDER[m].map(id => `<span class="chip" style="cursor:default">${esc(BY[id].short || BY[id].name.replace('OLL ', ''))} ${pill(cs(id).st)}</span>`).join('')}</div></details></div>`;
+
+  h += `<div class="card stack"><h2>How cases move</h2><ol class="steps" style="font-size:14px">
+    <li><b>Learning</b>: drill with the alg shown. After 20 tries a case moves to Practicing.</li>
+    <li><b>Practicing</b>: drill in recall mode and push for speed.</li>
+    <li><b>Known</b>: average under ${M.target}s across your last 12 recall tries with no “needed help”. It then shows up in the daily review.</li></ol>
+    <p class="muted" style="margin:0;font-size:13px">Slow cases and ones you needed help with come up more often.</p></div>`;
+
+  h += `<div class="card stack"><h2>Your data</h2><p class="muted" style="margin:0;font-size:14px">Times and settings are saved in this browser only. Copy a backup to move them to another device.</p>
+    <div class="row"><button class="btn small" data-act="copyBackup">Copy backup</button><button class="btn small" data-act="showRestore">Restore from backup</button><button class="btn small danger" data-act="resetAsk">Reset everything</button></div>
+    <div id="restoreBox" hidden class="stack"><textarea id="restoreText" rows="4" placeholder="Paste a backup here"></textarea><div class="row"><button class="btn small primary" data-act="restore">Restore</button></div></div>
+    <div id="resetBox" hidden class="row"><span style="font-size:14px">Delete all times and statuses?</span><button class="btn small danger" data-act="resetDo">Yes, reset</button><button class="btn small" data-act="resetNo">Keep my data</button></div></div>`;
+  return h + '</div>';
+}
+
+/* ---------- edit sheet ---------- */
+let sheetId = null;
+function openSheet(id, msg) {
+  sheetId = id; const c = BY[id], st = cs(id).st, s = stats(id), on = DB.sel[c.mode].includes(id);
+  const times = cs(id).times.slice(-20).reverse();
+  $('#sheet').innerHTML = `<div class="sheet-bg" data-act="closeSheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(c.name)}">
+    <div class="row" style="justify-content:space-between"><div><span class="label">${MODES[c.mode].label} · ${esc(c.group)}</span><h2>${esc(c.name)}</h2></div><button class="btn small" data-act="closeSheet">Close</button></div>
+    <div style="width:150px;margin:0 auto">${diagram(c)}</div>
+    <div><span class="label">Status</span><div class="row" style="margin-top:6px">${Object.keys(STATUS).map(k => `<button class="btn small" data-act="setStatus" data-v="${k}" aria-pressed="${st === k}">${STATUS[k]}</button>`).join('')}</div></div>
+    <div class="stack" style="gap:6px"><label class="label" for="algInput">Your algorithm</label><textarea id="algInput" rows="2">${esc(algOf(c))}</textarea>
+    <div class="row"><button class="btn small primary" data-act="saveAlg">Save alg</button>${cs(id).alg ? `<button class="btn small" data-act="resetAlg">Use standard alg</button>` : ''}<span class="muted alg" style="font-size:12px">Standard: ${esc(c.alg)}</span></div>
+    ${msg ? `<div class="note ${msg.ok ? 'ok' : 'err'}">${esc(msg.text)}</div>` : ''}</div>
+    <div class="statgrid"><div class="stat"><b>${s.n}</b><span>Attempts</span></div><div class="stat"><b>${fmtT(s.avg)}</b><span>Avg of 12</span></div><div class="stat"><b>${fmtT(s.best)}</b><span>Best</span></div><div class="stat"><b>${s.fails}</b><span>Needed help</span></div></div>
+    <div class="history">${times.map(x => `<span class="${x.f ? 'f' : ''}">${fmtT(x.t)}${x.r ? '' : '·'}</span>`).join('') || '<span class="muted" style="background:none;padding:0">No times yet.</span>'}</div>
+    ${times.length ? '<span class="muted" style="font-size:12px">A dot marks a time with the alg shown.</span>' : ''}
+    <div class="row"><button class="btn small" data-act="sheetToggle">${on ? 'Remove from drill' : 'Add to drill'}</button><button class="btn small primary" data-act="drillNow">Drill this case next</button></div>
+  </div></div>`;
+}
+function closeSheet() { sheetId = null; $('#sheet').innerHTML = ''; }
+
+/* ---------- timer ---------- */
+function setPad(cls) { const p = $('#pad'); if (!p) return; p.className = 'timerpad ' + cls; }
+function startHold() {
+  if (!cur || timer.state === 'running') return;
+  timer.state = 'holding'; setPad('holding'); const t = $('#time'); if (t) t.textContent = '0.00';
+  timer.hold = setTimeout(() => { if (timer.state === 'holding') { timer.state = 'ready'; setPad('ready'); } }, 300);
+}
+function release() {
+  if (timer.state === 'holding') { clearTimeout(timer.hold); timer.state = 'idle'; setPad(''); return; }
+  if (timer.state === 'ready') {
+    timer.state = 'running'; timer.start = performance.now(); setPad('running');
+    const tick = () => { if (timer.state !== 'running') return; const t = $('#time'); if (t) t.textContent = fmtT((performance.now() - timer.start) / 1000).replace(/(\.\d)\d$/, '$1'); timer.raf = requestAnimationFrame(tick); };
+    tick();
+  }
+  if (timer.state === 'stopped') timer.state = 'done';
+}
+function stop() {
+  const t = Math.round((performance.now() - timer.start) / 10) / 100;
+  cancelAnimationFrame(timer.raf); timer.state = 'stopped';
+  const c = cur.c, rec = { t, r: DB.recall ? 1 : 0, f: 0, d: Date.now() };
+  const cc = cs(c.id); cc.times.push(rec); if (cc.times.length > 150) cc.times.splice(0, cc.times.length - 150);
+  last = { id: c.id, t, recall: DB.recall, reveal: false, rec, f: 0 };
+  sessionTimes.push({ id: c.id, t, f: 0, rec });
+  promote(c);
+  save(); newScramble(); render();
+  timer.state = 'stopped'; setPad('');
+}
+function promote(c) {
+  const cc = cs(c.id), s = stats(c.id);
+  if ((cc.st === 'learning') && s.n >= 20) { cc.st = 'practicing'; toast(`${c.short || c.name} moved to Practicing after 20 tries.`); }
+  if (cc.st !== 'known' && s.recallAvg != null && s.recallAvg < MODES[c.mode].target) { cc.st = 'known'; toast(`${c.short || c.name} is Known: ${fmtT(s.recallAvg)} average over 12 recall tries.`); }
+}
+
+/* ---------- events ---------- */
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 3200); }
+function setSel(m, ids) { DB.sel[m] = [...new Set(ids)]; save(); render(); }
+function act(a, el, ev) {
+  const m = DB.mode, M = MODES[m], v = el.dataset.v, id = el.dataset.id;
+  const sel = new Set(DB.sel[m]);
+  switch (a) {
+    case 'tab': DB.tab = v; save(); render(); break;
+    case 'toggle': sel.has(id) ? sel.delete(id) : sel.add(id); setSel(m, [...sel]); break;
+    case 'selAll': setSel(m, M.list.map(c => c.id)); break;
+    case 'selNone': setSel(m, []); break;
+    case 'selGroup': { const ids = M.list.filter(c => c.group === v).map(c => c.id); const all = ids.every(i => sel.has(i)); ids.forEach(i => all ? sel.delete(i) : sel.add(i)); setSel(m, [...sel]); break; }
+    case 'selSlot': setSel(m, M.list.filter(c => v === 'FR' ? c.slot === 'FR' : c.slot !== 'FR').map(c => c.id)); break;
+    case 'selStatus': setSel(m, M.list.filter(c => cs(c.id).st === v).map(c => c.id)); break;
+    case 'edit': ev.stopPropagation(); openSheet(id); break;
+    case 'closeSheet': if (ev.target === el) { closeSheet(); render(); } break;
+    case 'setStatus': { const cc = cs(sheetId); cc.st = v; if (v === 'learning' && !cc.started) cc.started = Date.now(); if (v !== 'new' && !cc.started) cc.started = Date.now(); save(); openSheet(sheetId); render(); break; }
+    case 'saveAlg': {
+      const c = BY[sheetId], txt = $('#algInput').value.trim();
+      let msg;
+      try {
+        C.parse(txt);
+        if (!txt) throw new Error('Type an algorithm first.');
+        const ok = E.solves(c.mode, c, E.caseState(c.mode, c), txt);
+        if (txt === c.alg) delete cs(c.id).alg; else cs(c.id).alg = txt;
+        msg = ok ? { ok: true, text: 'Saved. The simulator confirms it solves this case.' } : { ok: false, text: 'Saved, but the simulator says this does not solve the case (even with a U turn before or after). Check it on a cube.' };
+        save();
+      } catch (e) { msg = { ok: false, text: e.message + '. Use moves like R U R\' U\' (wide: r or Rw, slices: M E S, rotations: x y z).' }; }
+      openSheet(sheetId, msg); render(); break;
+    }
+    case 'resetAlg': delete cs(sheetId).alg; save(); openSheet(sheetId, { ok: true, text: 'Back to the standard alg.' }); render(); break;
+    case 'sheetToggle': { const c = BY[sheetId], s2 = new Set(DB.sel[c.mode]); s2.has(c.id) ? s2.delete(c.id) : s2.add(c.id); DB.sel[c.mode] = [...s2]; save(); openSheet(sheetId); render(); break; }
+    case 'drillNow': { const c = BY[sheetId]; DB.mode = c.mode; forceCase = c.id; DB.tab = 'train'; newScramble(); save(); closeSheet(); render(); break; }
+    case 'recall': DB.recall = el.checked; save(); render(); break;
+    case 'toggleNet': DB.showNet = !DB.showNet; save(); render(); break;
+    case 'skip': newScramble(); timer.state = 'idle'; render(); break;
+    case 'reveal': if (last) last.reveal = true; render(); break;
+    case 'fail': if (last) { last.f = last.rec.f = last.f ? 0 : 1; const s = sessionTimes.find(x => x.rec === last.rec); if (s) s.f = last.f; save(); render(); } break;
+    case 'delLast': if (last) { const cc = cs(last.id); const i = cc.times.indexOf(last.rec); if (i >= 0) cc.times.splice(i, 1); sessionTimes = sessionTimes.filter(x => x.rec !== last.rec); last = null; save(); toast('Time deleted.'); render(); } break;
+    case 'startBlock': DB.session = { mode: m, block: v, end: Date.now() + BLOCKS[v].mins * 60000 }; DB.recall = v !== 'learn'; DB.tab = 'train'; save(); newScramble(); render(); break;
+    case 'endSession': DB.session = null; save(); newScramble(); render(); break;
+    case 'learnNext': { const nx = upNext(m); nx.forEach(i => { const cc = cs(i); cc.st = 'learning'; cc.started = Date.now(); sel.add(i); }); DB.sel[m] = [...sel]; save(); toast(`Started ${nx.length} case${nx.length === 1 ? '' : 's'}. They're in your Learn block and selection.`); render(); break; }
+    case 'copyBackup': { const txt = JSON.stringify(DB); navigator.clipboard.writeText(txt).then(() => toast('Backup copied. Paste it somewhere safe.'), () => { $('#restoreBox').hidden = false; $('#restoreText').value = txt; $('#restoreText').select(); toast('Copy the selected text to keep a backup.'); }); break; }
+    case 'showRestore': $('#restoreBox').hidden = false; break;
+    case 'restore': try { const d = JSON.parse($('#restoreText').value); if (!d || !d.cases) throw 0; DB = Object.assign(defaults(), d); save(); cur = null; toast('Backup restored.'); render(); } catch (e) { toast('That does not look like a Zach’s Case Trainer backup.'); } break;
+    case 'resetAsk': $('#resetBox').hidden = false; break;
+    case 'resetNo': $('#resetBox').hidden = true; break;
+    case 'resetDo': DB = defaults(); save(); cur = null; last = null; sessionTimes = []; toast('Everything was reset.'); render(); break;
+  }
+}
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  if (el.dataset.act === 'recall') return; // handled by change
+  if (el.closest('#pad')) return;
+  act(el.dataset.act, el, e);
+});
+document.addEventListener('change', e => { if (e.target.dataset.act === 'recall') act('recall', e.target, e); });
+document.getElementById('modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; DB.mode = b.dataset.mode; cur = null; timer.state = 'idle'; save(); render(); });
+document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; DB.tab = b.dataset.tab; save(); render(); });
+const typing = () => { const a = document.activeElement; return a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT' && a.type === 'text'); };
+document.addEventListener('keydown', e => {
+  if (sheetId) { if (e.key === 'Escape') { closeSheet(); render(); } return; }
+  if (typing() || DB.tab !== 'train') return;
+  if (timer.state === 'running') { e.preventDefault(); stop(); return; }
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat && ['idle', 'done', 'stopped'].includes(timer.state)) startHold(); }
+  else if (e.key === 'Enter' && document.activeElement && document.activeElement.dataset && document.activeElement.dataset.act === 'toggle') act('toggle', document.activeElement, e);
+});
+document.addEventListener('keyup', e => { if (e.code === 'Space' && DB.tab === 'train' && !sheetId && !typing()) { e.preventDefault(); release(); } });
+document.addEventListener('pointerdown', e => {
+  if (DB.tab !== 'train' || sheetId) return;
+  if (timer.state === 'running') { e.preventDefault(); stop(); return; }
+  if (e.target.closest('#pad') && (timer.state === 'idle' || timer.state === 'done')) { e.preventDefault(); startHold(); }
+});
+document.addEventListener('pointerup', e => { if (DB.tab === 'train' && !sheetId) release(); });
+document.addEventListener('pointercancel', () => { if (timer.state === 'holding' || timer.state === 'ready') { clearTimeout(timer.hold); timer.state = 'idle'; setPad(''); } });
+setInterval(() => {
+  const s = DB.session; if (!s) return;
+  if (Date.now() > s.end) { activeSession(); if (timer.state !== 'running') render(); return; }
+  const el = $('#sesLeft'); if (el) el.textContent = fmtLeft(s.end - Date.now());
+}, 1000);
+// arrow marker defs shared by all diagrams
+document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arwh"/></marker></defs></svg>');
+render();
+})();
+
+</script>
+</body>
+</html>
