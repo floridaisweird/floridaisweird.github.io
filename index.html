@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zach's Projects</title>
+<meta name="description" content="Things Zach has built: Pebble's City, Zach's Case Trainer, and whatever comes next.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%233f8f8a'/><text x='50' y='68' font-size='56' text-anchor='middle'>🦦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Nunito:wght@600;700;800&display=swap">
+<style>
+:root {
+  --sky-top: #5b8fd0; --sky-bottom: #cfe2f2; --ink: #1d2a33; --ink-soft: rgba(29, 42, 51, 0.72);
+  --glass: rgba(255, 255, 255, 0.55); --glass-edge: rgba(255, 255, 255, 0.7); --shadow: 0 10px 30px rgba(20, 30, 50, 0.22);
+  --stars: 0;
+  --display: 'Fraunces', Georgia, serif; --body: 'Nunito', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { font-family: var(--body); color: var(--ink); background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom)) fixed; min-height: 100%; -webkit-font-smoothing: antialiased; transition: color .6s; }
+body.night { --ink: #f2eefb; --ink-soft: rgba(242, 238, 251, 0.74); --glass: rgba(20, 22, 48, 0.5); --glass-edge: rgba(255, 255, 255, 0.16); --shadow: 0 10px 30px rgba(0, 0, 10, 0.4); }
+.stars { position: fixed; inset: 0; pointer-events: none; opacity: var(--stars); transition: opacity 1s;
+  background-image: radial-gradient(1.4px 1.4px at 12% 18%, #fff, transparent), radial-gradient(1px 1px at 28% 8%, #fff, transparent), radial-gradient(1.6px 1.6px at 46% 22%, #fff, transparent), radial-gradient(1px 1px at 63% 12%, #fff, transparent), radial-gradient(1.4px 1.4px at 78% 26%, #fff, transparent), radial-gradient(1px 1px at 90% 9%, #fff, transparent), radial-gradient(1px 1px at 8% 41%, #fff, transparent), radial-gradient(1.4px 1.4px at 36% 36%, #fff, transparent), radial-gradient(1px 1px at 71% 40%, #fff, transparent), radial-gradient(1.2px 1.2px at 94% 46%, #fff, transparent); }
+.hills { position: fixed; left: 0; right: 0; bottom: 0; height: 34vh; pointer-events: none; }
+.hills svg { width: 100%; height: 100%; display: block; }
+.hills .h1 { fill: var(--hill1, #8fb7a0); } .hills .h2 { fill: var(--hill2, #6f9e88); }
+main { position: relative; max-width: 620px; margin: 0 auto; padding-block: max(20px, env(safe-area-inset-top, 0px)) max(28px, env(safe-area-inset-bottom, 0px)); padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); }
+.status { display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; color: var(--ink-soft); letter-spacing: .02em; }
+.clock { margin: 26px 0 0; text-align: center; }
+.clock .time { font-family: var(--display); font-weight: 400; font-size: clamp(64px, 17vw, 96px); line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.clock .day { margin-top: 6px; font-weight: 700; font-size: 17px; color: var(--ink-soft); }
+.hello { text-align: center; margin: 22px 0 22px; font-family: var(--display); font-weight: 400; font-size: 20px; color: var(--ink-soft); text-wrap: balance; }
+.widget { display: block; position: relative; border-radius: 28px; overflow: hidden; color: #fff; text-decoration: none; box-shadow: var(--shadow); aspect-ratio: 16 / 9.4; background: #7a4a3a; isolation: isolate; transition: transform .2s ease; }
+.widget:hover { transform: translateY(-2px); }
+.widget img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 38% 55%; z-index: -2; }
+.widget::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(20, 10, 10, 0) 38%, rgba(20, 10, 14, 0.78)); }
+.widget .tag { position: absolute; top: 14px; left: 14px; background: rgba(255, 255, 255, 0.82); color: #2a2320; font-weight: 800; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 11px; border-radius: 999px; }
+.widget .cap { position: absolute; left: 18px; right: 18px; bottom: 16px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.widget h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(24px, 6vw, 30px); letter-spacing: -.01em; }
+.widget p { margin: 4px 0 0; font-weight: 600; font-size: 14px; opacity: .92; max-width: 34ch; text-wrap: pretty; }
+.widget .go { flex: none; background: #fff; color: #2a2320; font-weight: 800; font-size: 14px; padding: 9px 16px; border-radius: 999px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 22px 8px; margin-top: 30px; justify-items: center; }
+.app { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 92px; text-decoration: none; color: var(--ink); }
+.icon { width: 72px; height: 72px; border-radius: 17px; display: grid; place-items: center; overflow: hidden; box-shadow: 0 6px 16px rgba(20, 30, 50, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.25); transition: transform .15s ease; }
+.app:hover .icon { transform: scale(1.06); } .app:active .icon { transform: scale(.94); }
+.icon svg { width: 100%; height: 100%; display: block; }
+.label { font-weight: 800; font-size: 12.5px; text-align: center; line-height: 1.2; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25); text-wrap: balance; }
+body.night .label { text-shadow: none; }
+.ghost .icon { background: transparent; box-shadow: none; border: 2px dashed var(--ink-soft); color: var(--ink-soft); font-size: 30px; font-weight: 700; }
+.ghost .label { color: var(--ink-soft); }
+.dock { position: relative; margin: 38px auto 0; width: fit-content; max-width: 100%; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--glass-edge); border-radius: 22px; padding: 10px 16px; font-weight: 700; font-size: 13px; color: var(--ink-soft); }
+.dock a { color: var(--ink); text-decoration: none; font-weight: 800; border-bottom: 1.5px solid currentColor; }
+a:focus-visible { outline: 3px solid #fff; outline-offset: 4px; box-shadow: 0 0 0 6px rgba(30, 60, 90, 0.6); border-radius: 18px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="stars" aria-hidden="true"></div>
+<div class="hills" aria-hidden="true"><svg viewBox="0 0 800 200" preserveAspectRatio="none"><path class="h1" d="M0 90 C120 30 240 40 360 78 C480 116 600 50 800 70 L800 200 L0 200Z"/><path class="h2" d="M0 130 C140 90 260 110 400 138 C540 164 660 100 800 128 L800 200 L0 200Z"/></svg></div>
+<main>
+  <div class="status"><span id="where">floridaisweird.github.io</span><span id="weather"></span></div>
+  <div class="clock"><div class="time" id="time">--:--</div><div class="day" id="day"></div></div>
+  <p class="hello" id="hello">Things I've built</p>
+
+  <!-- FEATURED: the big card. Edit the text or link in the PROJECTS list near the bottom of this file. -->
+  <a class="widget" id="widget" href="./pebble/">
+    <img src="./assets/pebble-city.jpg" alt="Pebble the otter standing on the brick square in his 3D city at golden hour">
+    <span class="tag">Featured</span>
+    <span class="cap"><span><h2>Pebble's City</h2><p>An otter who lives on his own in a little 3D city. Nobody tells him what to do.</p></span><span class="go">Open</span></span>
+  </a>
+
+  <nav class="grid" id="grid" aria-label="Projects"></nav>
+  <div class="dock">More on <a href="https://github.com/floridaisweird">GitHub</a></div>
+</main>
+
+<script>
+/* ==== YOUR PROJECTS: edit this list ====
+   name   : label under the icon
+   url    : where it opens (use "./folder/" for things on this same site)
+   bg     : icon background colour (or two colours for a gradient)
+   glyph  : text drawn on the icon (a letter or two), or leave "" and use svg
+   featured: true puts it in the big card above (only one)                         */
+const PROJECTS = [
+  { name: "Pebble's City", url: "./pebble/", bg: ["#4aa39c", "#2f6f76"], svg: "otter", featured: true },
+  { name: "Zach's Case Trainer", url: "./case-trainer/", bg: ["#f0a15a", "#d9654b"], glyph: "ZC" },
+];
+
+const icons = {
+  otter: `<svg viewBox="0 0 72 72" aria-hidden="true"><circle cx="19" cy="20" r="7.5" fill="#6b4531"/><circle cx="53" cy="20" r="7.5" fill="#6b4531"/><ellipse cx="36" cy="38" rx="22" ry="20.5" fill="#8a5a40"/><ellipse cx="36" cy="46" rx="12.5" ry="9.5" fill="#e8d3b9"/><ellipse cx="36" cy="40.5" rx="4.4" ry="3.2" fill="#2a1a14"/><circle cx="27" cy="33" r="2.8" fill="#1d1410"/><circle cx="45" cy="33" r="2.8" fill="#1d1410"/><circle cx="27.9" cy="32" r=".9" fill="#fff"/><circle cx="45.9" cy="32" r=".9" fill="#fff"/><path d="M31 46.5q5 4 10 0" stroke="#2a1a14" stroke-width="1.6" fill="none" stroke-linecap="round"/><g stroke="#f6efe4" stroke-width="1.1" stroke-linecap="round"><path d="M22 43l-9-1.5M22 46l-9 2M50 43l9-1.5M50 46l9 2"/></g><path d="M12 72q24-16 48 0z" fill="#3f8f8a"/></svg>`,
+};
+const $ = (id) => document.getElementById(id);
+
+// ---- icons + featured card ----
+const grid = $('grid');
+for (const p of PROJECTS) {
+  if (p.featured) { const w = $('widget'); w.href = p.url; }
+  const a = document.createElement('a'); a.className = 'app'; a.href = p.url;
+  const bg = Array.isArray(p.bg) ? `linear-gradient(150deg, ${p.bg[0]}, ${p.bg[1]})` : p.bg;
+  const inner = p.svg ? icons[p.svg] : `<span style="font-family:var(--display);font-weight:600;font-size:30px;color:#fff;letter-spacing:-.02em">${p.glyph || p.name[0]}</span>`;
+  a.innerHTML = `<span class="icon" style="background:${bg}">${inner}</span><span class="label"></span>`;
+  a.querySelector('.label').textContent = p.name;
+  grid.append(a);
+}
+const ghost = document.createElement('div'); ghost.className = 'app ghost'; ghost.setAttribute('aria-hidden', 'true');
+ghost.innerHTML = '<span class="icon">+</span><span class="label">Next one</span>'; grid.append(ghost);
+
+// ---- the sky follows your local time of day ----
+const STOPS = [ // hour, top, bottom, hill1, hill2, stars
+  [0, '#0b1230', '#2a3566', '#27384f', '#1d2b40', 1], [5, '#1b2450', '#6a527a', '#2c3a52', '#212e44', .9], [6.5, '#5b78b8', '#f3b88c', '#8fa58f', '#6f8c7c', .1],
+  [9, '#5b8fd0', '#cfe2f2', '#8fb7a0', '#6f9e88', 0], [16, '#5b8fd0', '#d6e4f0', '#8fb7a0', '#6f9e88', 0], [18, '#4a5ea6', '#ffb77a', '#9a9a7e', '#7b8570', 0],
+  [19.5, '#2a2c68', '#c26a7a', '#4d5368', '#3a4258', .5], [21, '#0f1538', '#2f3a6c', '#2c3b52', '#223046', 1], [24, '#0b1230', '#2a3566', '#27384f', '#1d2b40', 1],
+];
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => '#' + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, '0')).join('');
+function paintSky(d) {
+  const h = d.getHours() + d.getMinutes() / 60; let i = 0;
+  while (i < STOPS.length - 2 && h >= STOPS[i + 1][0]) i++;
+  const a = STOPS[i], b = STOPS[i + 1], t = Math.min(1, Math.max(0, (h - a[0]) / (b[0] - a[0])));
+  const r = document.documentElement.style;
+  r.setProperty('--sky-top', mix(a[1], b[1], t)); r.setProperty('--sky-bottom', mix(a[2], b[2], t));
+  r.setProperty('--hill1', mix(a[3], b[3], t)); r.setProperty('--hill2', mix(a[4], b[4], t));
+  const stars = a[5] + (b[5] - a[5]) * t; r.setProperty('--stars', stars.toFixed(2));
+  document.body.classList.toggle('night', h < 5.5 || h >= 19.8);
+  $('hello').textContent = h < 5 ? "Still up? Same." : h < 12 ? 'Good morning. Things I\'ve built' : h < 18 ? "Things I've built" : "Good evening. Things I've built";
+}
+function tick() {
+  const d = new Date();
+  $('time').textContent = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M/i, '');
+  $('day').textContent = d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+  paintSky(d);
+}
+tick(); setInterval(tick, 20000);
+</script>
+</body>
+</html>
