@@ -1,1 +1,0 @@
-# floridaisweird.github.io
