@@ -850,7 +850,7 @@ const p15 = () => DB.plan15 || (DB.plan15 = { done: [], aaSwap: false });
 function p15Days() { const sw = p15().aaSwap; return P15_DAYS.map(n => 'pll' + (sw && n === 'Aa' ? 'T' : n)); }
 function p15Base() { return (p15().aaSwap ? ['Aa', 'Y', 'Ua', 'Ub', 'H', 'Z'] : ['T', 'Y', 'Ua', 'Ub', 'H', 'Z']).map(n => 'pll' + n); }
 function p15Today() { const d = p15Days(); const i = d.findIndex(id => !p15().done.includes(id)); return i; }
-function p15SoFar() { const d = p15Days(), i = p15Today(); return p15Base().concat(i < 0 ? d : d.slice(0, i + 1)); }
+function p15SoFar() { const d = p15Days(), i = p15Today(); return i < 0 ? d : d.slice(0, i + 1); } // full-PLL cases only, not the 2-look set
 function pll15HTML() {
   const d = p15Days(), done = new Set(p15().done), i = p15Today(), n = d.filter(id => done.has(id)).length;
   let h = `<div class="stack"><div class="card stack"><div class="row" style="justify-content:space-between"><h2>Full PLL in 2 weeks</h2><span class="muted num">${n} of 15 days done</span></div>
@@ -861,10 +861,10 @@ function pll15HTML() {
     h += `<div class="card stack"><span class="label">Day ${i + 1} · today's case</span>
     <div class="caseinfo">${diagram(c)}<div><h2>${esc(c.name)}</h2><div class="alg" style="margin-top:4px">${esc(algOf(c))}</div><div class="muted" style="font-size:13px;margin-top:4px">${stats(c.id).n} tries · avg ${fmtT(stats(c.id).avg)}</div></div></div>
     <ol class="steps" style="font-size:14px"><li>Learn it slowly with the alg shown: <button class="btn small" data-act="p15Today">Drill today's case</button></li>
-    <li>Then mix it with everything so far in recall mode: <button class="btn small" data-act="p15SoFar">Drill all ${p15SoFar().length} cases</button></li>
+    <li>Then mix it with the full-PLL cases so far in recall mode: <button class="btn small" data-act="p15SoFar">${p15SoFar().length === 1 ? 'Drill it in recall mode' : `Drill all ${p15SoFar().length} full-PLL cases`}</button></li>
     <li>When it feels solid, mark the day done. If yesterday's case still feels shaky, repeat that day instead of moving on.</li></ol>
     <div class="row"><button class="btn primary" data-act="p15Done" data-id="${c.id}">Mark day ${i + 1} done</button></div></div>`;
-  } else h += `<div class="card stack"><h2>All 15 days done</h2><p style="margin:0">You know full PLL. Keep reviewing in recall mode until every case is under 2.5s.</p><div class="row"><button class="btn primary" data-act="p15SoFar">Drill all 21 PLLs</button></div></div>`;
+  } else h += `<div class="card stack"><h2>All 15 days done</h2><p style="margin:0">You know full PLL. Keep reviewing in recall mode until every case is under 2.5s.</p><div class="row"><button class="btn primary" data-act="p15SoFar">Drill all 15 full-PLL cases</button></div></div>`;
   h += `<div class="card stack"><h3>Schedule</h3><div class="stack" style="gap:6px">${d.map((id, k) => { const c = BY[id], on = done.has(id); return `<div class="row" style="justify-content:space-between;flex-wrap:nowrap;padding:6px 0;border-bottom:1px solid var(--line)"><span style="min-width:0"><b class="num" style="display:inline-block;width:56px">Day ${k + 1}</b>${esc(c.name)}${k === i ? ' <span class="pill st-practicing">Today</span>' : ''}</span><button class="btn small" data-act="p15Toggle" data-id="${id}" aria-pressed="${on}">${on ? 'Done' : 'Mark done'}</button></div>`; }).join('')}</div>
   <label class="switch"><input type="checkbox" data-act="p15Swap" ${p15().aaSwap ? 'checked' : ''}>My 2-look used Aa instead of T (T moves to Day 3)</label></div></div>`;
   return h;
